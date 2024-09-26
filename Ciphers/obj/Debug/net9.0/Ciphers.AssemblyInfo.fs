@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("Ciphers")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e31acd59bc267236059444e5ee3001979b545b83")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1658e3f97be51b25f3cba25fbe3cf71c6eb1d621")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("Ciphers")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("Ciphers")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]

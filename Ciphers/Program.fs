@@ -26,9 +26,17 @@ let dataToVijenerCipher(data: string) (keyCodes: seq<int>) : string =
     for i = 0 to data.Length - 1 do
         if indexKey = keyCodeLength then
             indexKey <- 0         
-        result.Append(convertToAlphabet(charToAsciiCode data[i], Seq.item indexKey keyCodes))
+        result.Append(convertToAlphabet(charToAsciiCode data[i], Seq.item indexKey keyCodes)) |> ignore
         indexKey <- indexKey + 1
     result.ToString()
+
+
+let rec multiStepEncrypt(step: int) (data: string) (keyCodes: seq<int>) : string =
+    if step = 0 then
+        data
+    else
+        let dataEncrypted = dataToVijenerCipher data keyCodes
+        multiStepEncrypt (step - 1) dataEncrypted keyCodes
 
 let createFile(path:string) : unit  =
     try
@@ -77,14 +85,11 @@ let readFile(path: string) : string =
 
 
 printfn "Введи текст для шифрования"
-let mutable enterDate: string = Console.ReadLine()
+let mutable enterData: string = Console.ReadLine()
 printfn "Введи ключевое слово"
 let key: string = Console.ReadLine()
 let keyCodes = seq {for n = 0 to key.Length - 1 do charToAsciiCode(key[n])}
 
-for n in keyCodes do
-    printfn $"%d{n}"
-    
-let result = dataToVijenerCipher enterDate keyCodes
+let result = multiStepEncrypt 2 enterData keyCodes
 
 printfn $"%s{result}"

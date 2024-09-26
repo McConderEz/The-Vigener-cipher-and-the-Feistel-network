@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "r+40bZd16yM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\rusta\\RiderProjects\\The-Vigener-cipher-and-the-Feistel-network\\Ciphers\\Ciphers.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\rusta\\.nuget\\packages\\fsharp.core\\9.0.100-beta.24422.2\\fsharp.core.9.0.100-beta.24422.2.nupkg.sha512"
+  ],
+  "logs": []
+}

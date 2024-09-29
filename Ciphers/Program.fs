@@ -67,6 +67,31 @@ let rec multiStepEncrypt(step: int) (data: string) (keyCodes: seq<int>) : string
 let reverseString (s: string) =
     s.ToCharArray() |> Array.rev |> String
 
+
+let convertToAlphabetDecrypt(dataCode: int, keyCode: int) : char =
+    let mutable newCode = dataCode - (keyCode - 96)
+    if newCode < 97 then
+        newCode <- newCode + (122 - 96)
+    char newCode
+
+let dataToVigenereDecrypt(data: string) (keyCodes: seq<int>) : string =
+    let mutable result: StringBuilder = new StringBuilder()
+    let mutable indexKey: int = 0
+    let keyCodeLength = Seq.length keyCodes
+    for i = 0 to data.Length - 1 do
+        if indexKey = keyCodeLength then
+            indexKey <- 0         
+        result.Append(convertToAlphabetDecrypt(charToAsciiCode data[i], Seq.item indexKey keyCodes)) |> ignore
+        indexKey <- indexKey + 1
+    result.ToString()
+
+let rec multiStepDecrypt(step: int) (data: string) (keyCodes: seq<int>) : string =
+    if step = 0 then
+        data
+    else
+        let dataDecrypted = dataToVigenereDecrypt data keyCodes
+        multiStepDecrypt (step - 1) dataDecrypted keyCodes
+
 let createFile(path:string) : unit  =
     try
         let fullPath = Path.GetFullPath(path)
@@ -129,9 +154,14 @@ keyEncrypted <- salt + keyEncrypted
 
 let keyEncryptedKeys = seq {for n = 0 to keyEncrypted.Length - 1 do charToAsciiCode(keyEncrypted[n])}
 
-printfn $"data %s{enterData}"
-printfn $"key %s{keyEncrypted}"
-
-let result = multiStepEncrypt 2 enterData keyEncryptedKeys
+let result = multiStepEncrypt 1 enterData keyEncryptedKeys
 
 printfn $"%s{result}"
+
+
+let mutable decryptedResult = multiStepDecrypt 1 result keyEncryptedKeys
+
+decryptedResult <- reverseString decryptedResult
+
+printfn $"Дешифрованный текст: %s{decryptedResult}"
+

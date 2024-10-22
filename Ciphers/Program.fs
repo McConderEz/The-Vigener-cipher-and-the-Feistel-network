@@ -1,10 +1,12 @@
-﻿open System
+﻿module Program
+
+open System
 open System.IO
 open System.Text
 open System.Threading
 open System.Threading.Tasks
-open FeistelNetwork
 open VigenerCipher
+open FeistelNetwork
 
 
 let createFile(path:string) : unit  =
@@ -47,52 +49,64 @@ let readFile(path: string) : string =
         if not (Directory.Exists(directory)) || String.IsNullOrEmpty(fileExtension) then
             raise (DirectoryNotFoundException $"Directory does not exist: %s{directory}")
         else    
-            File.ReadAllText(path)
+            File.ReadAllText(path).TrimEnd('\r', '\n')
     with
         | _ -> printf "Failed to read file\n"; null
 
 
-
-printfn "Введите данные"
-
-let data: string = Console.ReadLine()
-
-let mutable partitions = partitionData data
-
-let mutable result = feistelNetwork (partitions, 16)
-
-writeFile("D:\\text.txt", result) |> ignore
-
-printfn $"\ns{result}"
-
-Console.ReadKey() |> ignore
-
-
-
-//printfn "Введи текст для шифрования"
-//let mutable enterData: string = Console.ReadLine()
-//printfn "Введи ключевое слово"
-//let mutable key: string = Console.ReadLine()
-
-//enterData <- reverseString enterData
-
-//let keyCodes = seq {for n = 0 to key.Length - 1 do charToAsciiCode(key[n])}
-
-//let salt = generateSalt 6
-
-//let mutable keyEncrypted = keyEncrypt key 1
-//keyEncrypted <- salt + keyEncrypted
-
-//let keyEncryptedKeys = seq {for n = 0 to keyEncrypted.Length - 1 do charToAsciiCode(keyEncrypted[n])}
-
-//let result = multiStepEncrypt 1 enterData keyEncryptedKeys
-
-//printfn $"%s{result}"
+let processFile(path: string, action: string, key: string, cipher: string, keys: string array) =
+    match action with
+    | "read" ->
+        let data = readFile path
+        printfn "Содержимое файла:\n%s" data
+    | "encrypt" ->
+        let data = readFile path
+        let encryptedData =
+            match cipher with
+            | "vigenere" -> multiStepEncrypt 1 data (seq { for c in key -> charToAsciiCode c })
+            | "feistel" ->
+                let partitions = partitionData data
+                let (encryptedPartitions, keys) = feistelNetwork(partitions, keys, 16)
+                partitionsToString encryptedPartitions
+            | _ -> failwith "Unknown cipher"
+        
+        let encryptedFilePath = Path.GetFileNameWithoutExtension(path) + "_encrypt" + Path.GetExtension(path)
+        writeFile(encryptedFilePath, encryptedData) |> ignore
+        printfn "Encrypted data written to %s" encryptedFilePath
+    | "decrypt" ->
+        let data = readFile path
+        let decryptedData =
+            match cipher with
+            | "vigenere" -> multiStepDecrypt 1 data (seq { for c in key -> charToAsciiCode c })
+            | "feistel" ->
+                let partitions = partitionData data
+                let decryptedPartitions = decryptFeistelNetwork(partitions, keys, 16)
+                partitionsToString decryptedPartitions
+            | _ -> failwith "Unknown cipher"
+        
+        let decryptedFilePath = Path.GetFileNameWithoutExtension(path) + "_decrypt" + Path.GetExtension(path)
+        writeFile(decryptedFilePath, decryptedData.Trim()) |> ignore
+        printfn "Decrypted data written to %s" decryptedFilePath
+    | _ -> printfn "Unknown action. Please specify 'encrypt', 'decrypt', or 'read'."
 
 
-//let mutable decryptedResult = multiStepDecrypt 1 result keyEncryptedKeys
 
-//decryptedResult <- reverseString decryptedResult
+let keys = generateKeys 16
+while true do
+    printfn "Введите путь к файлу:"
+    let filePath = Console.ReadLine()
+    
+    printfn "Введите действие (encrypt/decrypt/read):"
+    let action = Console.ReadLine().ToLower()
+    
+    printfn "Введите ключевое слово:"
+    let key = Console.ReadLine()
+    
+    printfn "Выберите шифр (vigenere/feistel):"
+    let cipher = Console.ReadLine().ToLower()
+    
+    processFile(filePath, action, key, cipher, keys)
+    
+    Console.ReadKey() |> ignore
 
-//printfn $"Дешифрованный текст: %s{decryptedResult}"
 
